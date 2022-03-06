@@ -10,6 +10,7 @@ using namespace std;
  * Fetch current crypto prices from api 
  * Calculate current values and compare to config 
  * Recommend trades to rebalance per config 
+ * Update config file with new balances if recommended trades were made. 
  * 
  * 
  * Refactor and technical goals:
@@ -18,6 +19,7 @@ using namespace std;
  * 
  * ToDo / left off:
  * problem in smult - improper index referenced or something  
+ * 
  * 
 */ 
 
@@ -113,17 +115,11 @@ string getprice(string line) {
 }
 
 double smult (string a, string b) {
-	char c[20];
-	char d[20];
 	double x, y;
+	string::size_type sz;     // alias of size_t
 	
-	for (int i = 0; i<20; i++) {
-		c[i] = a[i];
-		d[i] = b[i];
-	}
-	
-	x = atof (c);
-	y = atof (d); 
+	x = stod (a,&sz);
+	y = stod (b, &sz); 
 	
 	return x*y; 
 }
@@ -151,8 +147,8 @@ void readfromfile (string filename, Coin (&coins)[10]) {
 						if (coins[j].name.length() > 0 && a == coins[j].name) {				
 							coins[j].price = getprice(temp); 
 							cout << "price: " << coins[j].price << " | quant: " << coins[j].quant << endl;
-							//coins[j].usdval = smult(coins[j].price,coins[j].quant); 							
-							//cout << coins[j].name << ": " << coins[j].usdval << endl;
+							coins[j].usdval = smult(coins[j].price,coins[j].quant); 							
+							cout << coins[j].name << ": " << coins[j].usdval << endl;
 						}	
 					}
 					
