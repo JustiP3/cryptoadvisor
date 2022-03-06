@@ -18,7 +18,8 @@ using namespace std;
  * Implement linked list to allow variable numbers of coins 
  * 
  * ToDo / left off:
- * problem in smult - improper index referenced or something  
+ * readconfig should error check target balance percents to validate that they add to 100% 
+ * github currently has my api key public , how to pass variables into a shell script? need to fix that  
  * 
  * 
 */ 
@@ -146,9 +147,9 @@ void readfromfile (string filename, Coin (&coins)[10]) {
 					for (int j = 0; j < 10 ; j++) {						
 						if (coins[j].name.length() > 0 && a == coins[j].name) {				
 							coins[j].price = getprice(temp); 
-							cout << "price: " << coins[j].price << " | quant: " << coins[j].quant << endl;
+							//cout << "price: " << coins[j].price << " | quant: " << coins[j].quant << endl;
 							coins[j].usdval = smult(coins[j].price,coins[j].quant); 							
-							cout << coins[j].name << ": " << coins[j].usdval << endl;
+							//cout << coins[j].name << ": " << coins[j].usdval << endl;
 						}	
 					}
 					
@@ -176,34 +177,35 @@ void balance(Coin (&coins)[10]) {
 	 * calc offset in percent
 	 * */
 	double totalvalue = 0; 
-	double usd_offset[10];
-	double tbald; 
+	double usd_offset[10]; // the difference between target balance usd and current value usd for each coin 
+	double tbald; // target balance in usd 
+	string::size_type sz;     // alias of size_t - used to convert from string to double 
 	
 	cout << "Name    Price              Quant     USD Val    T Bal" << endl;
-	for (int i = 0 ; i < 6; i++) {
-		printcoin(coins[i]);
-		totalvalue += coins[i].usdval; 
-	}
-	cout << "total val is: " << totalvalue << endl;
 	
-	
-	for (int i = 0 ; i < 6; i++) {
-		char a[2];
-	
-		for (int b=0; b<2;b++) {
-			a[b] = coins[i].tbal[b];
-		}
-		tbald = atof(a);
-		usd_offset[i] = coins[i].usdval - ((tbald/100) * totalvalue);
-		//offset[i] =(coins[i].usdval / totalvalue) - (tbald/100) ;		 
-		cout << "You are holding $" << usd_offset[i] << "USD " << coins[i].name
-		<< " compared to target " << "USD: " << tbald*totalvalue/100 << endl;
-		//cout << "Target USD Value is: " << (tbald/100) * totalvalue << endl;		
+	for (unsigned int x = 0 ; x < 10; x++) {
+		if (coins[x].name.length() > 0) {
+			printcoin(coins[x]);
+			totalvalue += coins[x].usdval;
+		}		
 	}
 	
+	cout << "total val is: " << totalvalue << endl;	
+	
+
+	for (int i = 0 ; i < 10; i++) {
+		if (coins[i].name.length() > 0) {
+
+			// convert string target balance to double 
+			tbald = stod (coins[i].tbal, &sz);
+
+			// print results 
+			usd_offset[i] = coins[i].usdval - ((tbald/100) * totalvalue);	 
+			cout << "You are holding $" << usd_offset[i] << "USD " << coins[i].name
+			<< " compared to target " << "USD: " << tbald*totalvalue/100 << endl;
+		}		
+	}	
 }
-
-
 
 
 int main(){
@@ -223,7 +225,7 @@ int main(){
 
 	readfromfile("list.txt", coins); 
 	
-	//balance(coins);
+	balance(coins);
 	
 	return 0;
 }
