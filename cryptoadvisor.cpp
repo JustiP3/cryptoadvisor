@@ -19,6 +19,7 @@ using namespace std;
  * 
  * ToDo / left off:
  * readconfig should error check target balance percents to validate that they add to 100% 
+ * validate input for response to "would you like reblance recommendations?"
  * github currently has my api key public , how to pass variables into a shell script? need to fix that  
  * 
  * 
@@ -170,6 +171,11 @@ void printcoin(Coin c) {
 
 }
 
+void recommend(Coin(&coins)[10], double(&offset)[10]) {
+	// how to do this
+	cout << "hello from recommend()" << endl; 
+}
+
 void balance(Coin (&coins)[10]) {
 	/*
 	 * calc total value
@@ -199,12 +205,25 @@ void balance(Coin (&coins)[10]) {
 			// convert string target balance to double 
 			tbald = stod (coins[i].tbal, &sz);
 
-			// print results 
-			usd_offset[i] = coins[i].usdval - ((tbald/100) * totalvalue);	 
+			// populate usd offset array 
+			usd_offset[i] = coins[i].usdval - ((tbald/100) * totalvalue);	
+
+			//print results  
 			cout << "You are holding $" << usd_offset[i] << "USD " << coins[i].name
 			<< " compared to target " << "USD: " << tbald*totalvalue/100 << endl;
 		}		
 	}	
+
+	// ask user if they would like trade reccomendations 
+	cout << "Would you like trade recommendations?" << endl; 
+	cout << "(y / n)" << endl; 
+	char input;
+	cin >> input; 
+	if (input == 'y') {
+		recommend(coins, usd_offset);
+	} else {
+		cout << "no" << endl; 
+	}
 }
 
 
