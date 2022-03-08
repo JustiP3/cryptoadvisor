@@ -3,7 +3,6 @@
 #include <cstring>
 #include <cstdlib>
 
-using namespace std;
 /*
  * Program Goals:
  * Read text file with config and current holdings
@@ -27,32 +26,32 @@ using namespace std;
 
 struct Coin 
 {
-	string name;
-	string quant; 
-	string price; 
+	std::string name;
+	std::string quant; 
+	std::string price; 
 	double usdval;
-	string tbal;
+	std::string tbal;
 };
 
 
-void writetofile(string) {
+void writetofile(std::string) {
 	char data[100];
 	// creating the file variable of the fstream data type for writing
-	fstream wfile;
+	std::fstream wfile;
 	// opening the file in both read and write mode
-	wfile.open ("demo.txt", ios::out| ios::in );
+	wfile.open ("demo.txt", std::ios::out| std::ios::in );
 	// Asking the user to enter the content
-	cout<< "Please write the content in the file." <<endl;
+	std::cout<< "Please write the content in the file." << std::endl;
 	// Taking the data using getline() function
-	cin.getline(data, 100);
+	std::cin.getline(data, 100);
 	// Writing the above content in the file named 'demp.txt'
-	wfile<< data <<endl;
+	wfile<< data << std::endl;
 	// closing the file after writing
 	wfile.close();
 }
 
-void readconfig(string (&names)[10], string (&holdings)[10], string (&tbal)[10]) {
-	ifstream input;
+void readconfig(std::string (&names)[10], std::string (&holdings)[10], std::string (&tbal)[10]) {
+	std::ifstream input;
 	input.open("config.txt");
 	
 	input >> names[0] >> names[1] >> names[2] >> names[3] >> names[4] >> names[5]
@@ -62,7 +61,7 @@ void readconfig(string (&names)[10], string (&holdings)[10], string (&tbal)[10])
 	input.close(); 	
 }
 
-string getsym(string line) {
+std::string getsym(std::string line) {
 	char p[line.length()];
 	
     unsigned int i;
@@ -78,9 +77,9 @@ string getsym(string line) {
 	} else if (p[15] == '"') {
 		len = 5 ;
 	} else {
-		cout << "error" << endl; 
+		std::cout << "error" << std::endl; 
 	}
-	string ans;
+	std::string ans;
 	for (int i = 0; i < len; i++) {		 
 		ans.push_back(p[i+10]);
 	}
@@ -88,7 +87,7 @@ string getsym(string line) {
     return ans; 
 }
 
-string getprice(string line) {
+std::string getprice(std::string line) {
 	
 	// between the 6th and 7th quotation marks 	
 	int quoteindex [7]; 
@@ -107,7 +106,7 @@ string getprice(string line) {
 	// length of the coin price which is between the 6th and 7th quotation marks 
 	int len = quoteindex[6] - quoteindex[5] - 3;
 	
-	string ans; 
+	std::string ans; 
 	
 	for (unsigned int x = 0; x< len; x++) {
 		ans.push_back(p[quoteindex[5]+ 2 + x]);
@@ -116,9 +115,9 @@ string getprice(string line) {
 	return ans; 
 }
 
-double smult (string a, string b) {
+double smult (std::string a, std::string b) {
 	double x, y;
-	string::size_type sz;     // alias of size_t
+	std::string::size_type sz;     // alias of size_t
 	
 	x = stod (a,&sz);
 	y = stod (b, &sz); 
@@ -126,15 +125,32 @@ double smult (string a, string b) {
 	return x*y; 
 }
 
-void readfromfile (string filename, Coin (&coins)[10]) {
+double abs(double x) {
+	if (x > 0) {
+		return x;
+	} else {
+		return x * -1; 
+	}
+}
+
+bool appxequal(double x, double y) {
+	double diff = x - y;
+	if (diff > 0.1 || diff < -0.1) {
+		return false;
+	} else {
+		return true; 
+	}
+}
+
+void readfromfile (std::string filename, Coin (&coins)[10]) {
 		
-		ifstream rfile;
+		std::ifstream rfile;
 		rfile.open (filename);
 	
-		for (string tp; getline(rfile, tp); ) {
+		for (std::string tp; getline(rfile, tp); ) {
 			char p[tp.length()];
-			string lines [100] ;
-			string temp = ",";				
+			std::string lines [100] ;
+			std::string temp = ",";				
 			
 			int linecount = 0;
 			for (int i = 0; i < sizeof(p); i++) {
@@ -143,12 +159,12 @@ void readfromfile (string filename, Coin (&coins)[10]) {
 				temp.push_back(p[i]);
 				if (p[i] == 125) {
 					lines[linecount] = temp;					
-					string a = getsym(temp);					
+					std::string a = getsym(temp);					
 					
 					for (int j = 0; j < 10 ; j++) {						
 						if (coins[j].name.length() > 0 && a == coins[j].name) {				
 							coins[j].price = getprice(temp); 
-							//cout << "price: " << coins[j].price << " | quant: " << coins[j].quant << endl;
+							//cout << "price: " << coins[j].price << " | quant: " << coins[j].quant << std::endl;
 							coins[j].usdval = smult(coins[j].price,coins[j].quant); 							
 							//cout << coins[j].name << ": " << coins[j].usdval << endl;
 						}	
@@ -163,17 +179,87 @@ void readfromfile (string filename, Coin (&coins)[10]) {
 } 
 
 void printcoin(Coin c) {
-	cout << c.name << "    " ; 
-	cout << c.price << "   "; 
-	cout << c.quant << "   " ; 
-	cout << c.usdval << "   " ; 
-	cout << c.tbal << "%" << endl; 
+	std::cout << c.name << "    " ; 
+	std::cout << c.price << "   "; 
+	std::cout << c.quant << "   " ; 
+	std::cout << c.usdval << "   " ; 
+	std::cout << c.tbal << "%" << std::endl; 
 
 }
 
 void recommend(Coin(&coins)[10], double(&offset)[10]) {
-	// how to do this
-	cout << "hello from recommend()" << endl; 
+	// test input - all values need to add to 0 
+	double sum = 0; 
+	unsigned int length = 0;
+	for (unsigned int j = 0 ; j < 10; j++) {
+		if (coins[j].name.length() > 0) {
+			length ++; 
+		}
+	}
+	for (unsigned int i = 0; i< length; i++) {
+		sum += offset[i];
+		std::cout << "offset " << i << " " << offset[i] << std::endl; 
+		std::cout << "sum = " << sum << std::endl; 
+	}
+	if (!appxequal(sum, 0.0)) {
+		std::cout << sum << " does not add to 0" << std::endl; 	
+		return;
+	} 
+	 
+	unsigned int current_index = 0;
+	unsigned int other_index = 1;
+	bool positive;
+	double small = 0; 
+
+	while (current_index < length) {
+	 
+	// is current index positive or negative?
+	if (offset[current_index] > 0) {
+		positive = true;
+	} else {
+		positive = false;
+	}
+
+	// what is the smaller magnitude?
+	if (abs(offset[current_index]) < abs(offset[other_index])) {
+		small = abs(offset[current_index]);
+	} else {
+		small = abs(offset[other_index]);
+	}
+
+	// move smaller magnitude from postive value to negative value
+	if (positive == true && offset[other_index] < 0) {
+		// curr is positive and other is negative	
+		std::cout << "move " << small << " from curr to other." << std::endl; 
+		offset[current_index] = offset[current_index] - small;
+		offset[other_index] = offset[other_index] + small; 
+
+	} 
+	if (positive == false && offset[other_index] > 0 ) {
+		// curr is negative and other is positive 
+		std::cout  << "move " << small << " from other to curr." << std::endl; 
+		offset[current_index] = offset[current_index] + small;
+		offset[other_index] = offset[other_index] - small; 
+	}
+
+	//increment counters 
+	if (appxequal(offset[current_index], 0.0)) {
+		current_index ++;
+		other_index = 1;
+	} else {
+		other_index++; 
+	}
+	if(other_index == current_index) {
+		other_index++;
+	}
+	small = 0.0; 
+
+	if (current_index > length || other_index > length) {
+		std::cout << "index is greater than length." << std::endl;
+		return;
+	}
+
+	} // end while loop  
 }
 
 void balance(Coin (&coins)[10]) {
@@ -185,9 +271,9 @@ void balance(Coin (&coins)[10]) {
 	double totalvalue = 0; 
 	double usd_offset[10]; // the difference between target balance usd and current value usd for each coin 
 	double tbald; // target balance in usd 
-	string::size_type sz;     // alias of size_t - used to convert from string to double 
+	std::string::size_type sz;     // alias of size_t - used to convert from string to double 
 	
-	cout << "Name    Price              Quant     USD Val    T Bal" << endl;
+	std::cout << "Name    Price              Quant     USD Val    T Bal" << std::endl;
 	
 	for (unsigned int x = 0 ; x < 10; x++) {
 		if (coins[x].name.length() > 0) {
@@ -196,7 +282,7 @@ void balance(Coin (&coins)[10]) {
 		}		
 	}
 	
-	cout << "total val is: " << totalvalue << endl;	
+	std::cout << "total val is: " << totalvalue << std::endl;	
 	
 
 	for (int i = 0 ; i < 10; i++) {
@@ -209,20 +295,20 @@ void balance(Coin (&coins)[10]) {
 			usd_offset[i] = coins[i].usdval - ((tbald/100) * totalvalue);	
 
 			//print results  
-			cout << "You are holding $" << usd_offset[i] << "USD " << coins[i].name
-			<< " compared to target " << "USD: " << tbald*totalvalue/100 << endl;
+			std::cout << "You are holding $" << usd_offset[i] << "USD " << coins[i].name
+			<< " compared to target " << "USD: " << tbald*totalvalue/100 << std::endl;
 		}		
 	}	
 
 	// ask user if they would like trade reccomendations 
-	cout << "Would you like trade recommendations?" << endl; 
-	cout << "(y / n)" << endl; 
+	std::cout << "Would you like trade recommendations?" << std::endl; 
+	std::cout << "(y / n)" << std::endl; 
 	char input;
-	cin >> input; 
+	std::cin >> input; 
 	if (input == 'y') {
 		recommend(coins, usd_offset);
 	} else {
-		cout << "no" << endl; 
+		std::cout << "no" << std::endl; 
 	}
 }
 
@@ -230,9 +316,9 @@ void balance(Coin (&coins)[10]) {
 int main(){
 	Coin coins[10] ;
 
-	string names[10] = {};
-	string holdings[10] = {};
-	string tbal[10] = {}; 
+	std::string names[10] = {};
+	std::string holdings[10] = {};
+	std::string tbal[10] = {}; 
 	
 	readconfig(names, holdings, tbal); 		
 	
