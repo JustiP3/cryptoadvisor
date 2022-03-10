@@ -17,9 +17,9 @@
  * Implement linked list to allow variable numbers of coins 
  * 
  * ToDo / left off:
- * readconfig should error check target balance percents to validate that they add to 100% 
+ * readfromfile - when comparing temp string to coins[j].name we always get false even when it should be true 
  * validate input for response to "would you like reblance recommendations?"
- * github currently has my api key public , how to pass variables into a shell script? need to fix that  
+ * 
  * 
  * 
 */ 
@@ -64,11 +64,11 @@ void readconfig(std::string (&names)[10], std::string (&holdings)[10], std::stri
 
 		for (int i = 0; i < sizeof(p); i++) {
 			p[i] = tp[i]; // convert string to char array 
-
-			temp.push_back(p[i]); // copy char into the temp string 
+			
 			if (p[i] == 32) {
 				// if we hit the space increment entries index and copy temp to 
-				// names holdings or tbal based on line number								
+				// names holdings or tbal based on line number	
+				// don't copy the space into the temp string 							
 								
 				switch (linecount) {
 					case 0:
@@ -82,10 +82,14 @@ void readconfig(std::string (&names)[10], std::string (&holdings)[10], std::stri
 					break;
 					default:
 					std::cout << "error in read config" << std::endl;
-					break;
+					break;				
+
 				};							
 				temp = "";
-				entries_index++;						
+				entries_index++;	
+			} else {
+				// as long as this char is not space, copy into the temp string 
+				temp.push_back(p[i]); // copy char into the temp string 
 			}		
 		}
 		linecount++;
@@ -192,14 +196,17 @@ void readfromfile (std::string filename, Coin (&coins)[10], unsigned int length)
 				temp.push_back(p[i]);
 				if (p[i] == 125) {
 					lines[linecount] = temp;					
-					std::string a = getsym(temp);					
+					std::string a = getsym(temp);
+					//std::cout << "|" << a << "|" << std::endl; 					
 					
-					for (int j = 0; j < length ; j++) {						
-						if (coins[j].name.length() > 0 && a == coins[j].name) {				
+					for (unsigned int j = 0; j < length ; j++) {	
+						//std::cout << "|" << coins[j].name << "|" << std::endl; 		
+						if (a.compare(coins[j].name) == 0) {											
 							coins[j].price = getprice(temp); 
+							std::cout << coins[j].price << std::endl; 
 							//cout << "price: " << coins[j].price << " | quant: " << coins[j].quant << std::endl;
 							coins[j].usdval = smult(coins[j].price,coins[j].quant); 							
-							//cout << coins[j].name << ": " << coins[j].usdval << endl;
+							std::cout << coins[j].name << ": " << coins[j].usdval << std::endl;
 						}	
 					}
 					
@@ -350,6 +357,7 @@ int main(){
 	for (int i = 0; i < 10; i++) {
 		if (names[i].length() > 0 ) {
 			length++;
+			//std::cout << names[i] << holdings[i] << tbal[i] << std::endl;
 		}
 	}		
 
@@ -357,6 +365,7 @@ int main(){
 		coins[j].name = names[j];	
 		coins[j].quant = holdings[j];
 		coins[j].tbal = tbal[j]; 
+		std::cout << coins[j].name << coins[j].quant << coins[j].tbal << std::endl;
 	}		
 
 	readfromfile("list.txt", coins, length); 
