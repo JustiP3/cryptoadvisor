@@ -198,17 +198,12 @@ void readfromfile (std::string filename, Coin (&coins)[10], unsigned int length)
 				temp.push_back(p[i]);
 				if (p[i] == 125) {
 					lines[linecount] = temp;					
-					std::string a = getsym(temp);
-					//std::cout << "|" << a << "|" << std::endl; 					
+					std::string a = getsym(temp);				
 					
-					for (unsigned int j = 0; j < length ; j++) {	
-						//std::cout << "|" << coins[j].name << "|" << std::endl; 		
+					for (unsigned int j = 0; j < length ; j++) {		
 						if (a.compare(coins[j].name) == 0) {											
 							coins[j].price = getprice(temp); 
-							std::cout << coins[j].price << std::endl; 
-							//cout << "price: " << coins[j].price << " | quant: " << coins[j].quant << std::endl;
 							coins[j].usdval = smult(coins[j].price,coins[j].quant); 							
-							std::cout << coins[j].name << ": " << coins[j].usdval << std::endl;
 						}	
 					}
 					
@@ -238,10 +233,12 @@ void confirm_trade(double mag, Coin(&coins)[10], unsigned int big, unsigned int 
 	
 	double s_price = stod (coins[small].price,&sz);
 	double b_price = stod (coins[big].price, &sz); 
-	double s_quant = stod (coins[big].quant, &sz); 
+	double s_quant = stod (coins[small].quant, &sz); 
 	double b_quant = stod (coins[big].quant, &sz); 
 
-	std::cout << "Sell " << (mag /b_price) << coins[big].name << std::endl;
+	std::cout << "small and big quant: " << s_quant << " " << b_quant << std::endl; 
+
+	std::cout << "Sell " << (mag /b_price) << " " << coins[big].name << std::endl;
 	std::cout << "What amount of " << coins[small].name << " are you getting in exchange?" << std::endl;
 	double temp;
 	std::cin >> temp; 
@@ -417,7 +414,7 @@ int main(){
 		coins[j].name = names[j];	
 		coins[j].quant = holdings[j];
 		coins[j].tbal = tbal[j]; 
-		std::cout << coins[j].name << coins[j].quant << coins[j].tbal << std::endl;
+		//std::cout << coins[j].name << coins[j].quant << coins[j].tbal << std::endl;
 	}		
 
 	readfromfile("list.txt", coins, length); 
