@@ -5,10 +5,10 @@
 
 /*
  * Program Goals:
- * Read text file with config and current holdings
- * Fetch current crypto prices from api 
- * Calculate current values and compare to config 
- * Recommend trades to rebalance per config 
+ * Read text file with config and current holdings - done 
+ * Fetch current crypto prices from api - bash script calls api, writes to text file then this program reads from text file - close enough
+ * Calculate current values and compare to config - done 
+ * Recommend trades to rebalance per config - done, kind of. recommend trades in terms of the coin at hand rather than USD - almost there 
  * Update config file with new balances if recommended trades were made. 
  * 
  * 
@@ -17,9 +17,11 @@
  * Implement linked list to allow variable numbers of coins 
  * 
  * ToDo / left off:
- * readfromfile - when comparing temp string to coins[j].name we always get false even when it should be true 
+ * clean up main() - move to small helper functions 
+ * Recommend trades to rebalance per config - done, kind of. recommend trades in terms of the coin at hand rather than USD - almost there 
  * validate input for response to "would you like reblance recommendations?"
- * 
+ * Update config file with new balances if recommended trades were made. 
+ * create follow up loop after recommendations for user input regarding exact trade value
  * 
  * 
 */ 
@@ -227,17 +229,47 @@ void printcoin(Coin c) {
 
 }
 
+void confirm_trade(double mag, Coin(&coins)[10], unsigned int big, unsigned int small) {
+	// move magnitude from coins[big] to coins[small]
+	// confirm exact coin amount
+	// recalculate usd amount 
+	// get price in double 
+	std::string::size_type sz;     // alias of size_t
+	
+	double s_price = stod (coins[small].price,&sz);
+	double b_price = stod (coins[big].price, &sz); 
+	double s_quant = stod (coins[big].quant, &sz); 
+	double b_quant = stod (coins[big].quant, &sz); 
+
+	std::cout << "Sell " << (mag /b_price) << coins[big].name << std::endl;
+	std::cout << "What amount of " << coins[small].name << " are you getting in exchange?" << std::endl;
+	double temp;
+	std::cin >> temp; 
+	//validate temp 
+	b_quant -= temp;
+	s_quant += temp;
+	std::cout << "new coin balance: " << std::endl;
+	std::cout << coins[small].name << s_quant << std::endl;
+	std::cout << coins[big].name << b_quant << std::endl;
+
+	// need to update coin with string version of new coin balance 
+}
+
+void update_config(Coin(&coins)[10], unsigned int length) {
+	// update config with new coin values 
+}
+
 void recommend(Coin(&coins)[10], double(&offset)[10], unsigned int length) {
 	// test input - all values need to add to 0 
 	double sum = 0; 
 	
 	for (unsigned int i = 0; i< length; i++) {
 		sum += offset[i];
-		std::cout << "offset " << i << " " << offset[i] << std::endl; 
-		std::cout << "sum = " << sum << std::endl; 
+		//std::cout << "offset " << i << " " << offset[i] << std::endl; 
+		//std::cout << "sum = " << sum << std::endl; 
 	}
 	if (!appxequal(sum, 0.0)) {
-		std::cout << sum << " does not add to 0" << std::endl; 	
+		std::cout << sum << "does not add to 0" << std::endl; 	
 		return;
 	} 
 	 
@@ -255,6 +287,8 @@ void recommend(Coin(&coins)[10], double(&offset)[10], unsigned int length) {
 		positive = false;
 	}
 
+	std::string in; // user input 
+
 	// what is the smaller magnitude?
 	if (abs(offset[current_index]) < abs(offset[other_index])) {
 		small = abs(offset[current_index]);
@@ -265,16 +299,33 @@ void recommend(Coin(&coins)[10], double(&offset)[10], unsigned int length) {
 	// move smaller magnitude from postive value to negative value
 	if (positive == true && offset[other_index] < 0) {
 		// curr is positive and other is negative	
-		std::cout << "move " << small << " from curr to other." << std::endl; 
+		std::cout << "move " << small << "USD from " << coins[current_index].name << "to " << coins[other_index].name << std::endl; 
+
 		offset[current_index] = offset[current_index] - small;
 		offset[other_index] = offset[other_index] + small; 
 
+		std::cout << "Would you like to make this trade?" << std::endl; 
+		std::cout << "Enter 'y' for yes." << std::endl; 
+        
+		std::cin >> in; 
+		if (in.compare("y") == 0) {
+			confirm_trade(small, coins, current_index, other_index);
+		}
+		
 	} 
 	if (positive == false && offset[other_index] > 0 ) {
 		// curr is negative and other is positive 
-		std::cout  << "move " << small << " from other to curr." << std::endl; 
+		std::cout  << "Move " << small << "USD from " << coins[other_index].name << " to " << coins[current_index].name << std::endl; 
 		offset[current_index] = offset[current_index] + small;
 		offset[other_index] = offset[other_index] - small; 
+
+		std::cout << "Would you like to make this trade?" << std::endl; 
+		std::cout << "Enter 'y' for yes." << std::endl; 
+        
+		std::cin >> in; 
+		if (in.compare("y") == 0) {
+			confirm_trade(small, coins, other_index, current_index);
+		}
 	}
 
 	//increment counters 
@@ -288,6 +339,7 @@ void recommend(Coin(&coins)[10], double(&offset)[10], unsigned int length) {
 		other_index++;
 	}
 	small = 0.0; 
+	in = ""; 
 
 	if (current_index > length || other_index > length) {
 		std::cout << "index is greater than length." << std::endl;
