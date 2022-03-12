@@ -19,11 +19,12 @@
  * Implement linked list to allow variable numbers of coins 
  * 
  * ToDo / left off:
+ * new coin balance is wrong - need to fix 
  * clean up main() - move to small helper functions 
+ * move total val from balance into print coins and format it in a nice way 
  * Recommend trades to rebalance per config - done, kind of. recommend trades in terms of the coin at hand rather than USD - almost there 
  * validate input for response to "would you like reblance recommendations?"
  * Update config file with new balances if recommended trades were made. 
- * create follow up loop after recommendations for user input regarding exact trade value
  * 
  * 
 */ 
@@ -38,21 +39,7 @@ struct Coin
 };
 
 
-void writetofile(std::string) {
-	char data[100];
-	// creating the file variable of the fstream data type for writing
-	std::fstream wfile;
-	// opening the file in both read and write mode
-	wfile.open ("demo.txt", std::ios::out| std::ios::in );
-	// Asking the user to enter the content
-	std::cout<< "Please write the content in the file." << std::endl;
-	// Taking the data using getline() function
-	std::cin.getline(data, 100);
-	// Writing the above content in the file named 'demp.txt'
-	wfile<< data << std::endl;
-	// closing the file after writing
-	wfile.close();
-}
+
 
 void readconfig(std::string (&names)[10], std::string (&holdings)[10], std::string (&tbal)[10]) {
 	std::ifstream input;
@@ -229,7 +216,7 @@ void printcoin(Coin c) {
 
 	const int tname_len = 6;
 	const int tprice_len = 24;
-	const int tquant_len = 12; 
+	const int tquant_len = 20; 
 	const int tusdval_len = 14; 
 	const int ttbal_len = 6;
 
@@ -241,22 +228,22 @@ void printcoin(Coin c) {
 	
 	std::cout << c.name; 
 	for (int a = 0 ; a < name_dash; a++) {
-		std::cout << '-';
+		std::cout << ' ';
 	}	
 
 	std::cout << c.price; 
 	for (int d = 0 ; d < price_dash; d++) {
-		std::cout << '-';
+		std::cout << ' ';
 	}
 
 	std::cout << c.quant; 
 	for (int f = 0 ; f < quant_dash; f++) {
-		std::cout << '-';
+		std::cout << ' ';
 	}
 
 	std::cout << usdval; 
 	for (int h = 0 ; h < usdval_dash; h++) {
-		std::cout << '-';
+		std::cout << ' ';
 	}
 
 	std::cout << c.tbal << "%" << std::endl; 
@@ -264,45 +251,64 @@ void printcoin(Coin c) {
 }
 
 void print_coins(Coin (&coins)[10], unsigned int length) {
-	//6 16 12 14 6 
-	std::cout << "Name--Price-------------------Quant-------USD Val-------T Bal-" << std::endl;
+	std::cout << "Name  Price                   Quant               USD Val       T Bal " << std::endl;
 
 	for (unsigned int x = 0 ; x < length; x++) {
-		// 6 12 12 12 5 
 		printcoin(coins[x]);
 	}
 }
 
 void confirm_trade(double mag, Coin(&coins)[10], unsigned int big, unsigned int small) {
-	// move magnitude from coins[big] to coins[small]
-	// confirm exact coin amount
-	// recalculate usd amount 
-
-	std::string::size_type sz;     // alias of size_t
 	
-	double s_price = stod (coins[small].price,&sz);
+	std::string::size_type sz; 
+	
 	double b_price = stod (coins[big].price, &sz); 
 	double s_quant = stod (coins[small].quant, &sz); 
 	double b_quant = stod (coins[big].quant, &sz); 
+	double b_coins_to_sell = mag / b_price; 
 
-	std::cout << "small and big quant: " << s_quant << " " << b_quant << std::endl; 
-
-	std::cout << "Sell " << (mag /b_price) << " " << coins[big].name << std::endl;
+	std::cout << "Sell " << b_coins_to_sell << " " << coins[big].name << std::endl;
 	std::cout << "What amount of " << coins[small].name << " are you getting in exchange?" << std::endl;
 	double temp;
 	std::cin >> temp; 
-	//validate temp 
-	b_quant -= temp;
-	s_quant += temp;
-	std::cout << "new coin balance: " << std::endl;
-	std::cout << coins[small].name << s_quant << std::endl;
-	std::cout << coins[big].name << b_quant << std::endl;
+	//need to validate temp 
 
-	// need to update coin with string version of new coin balance 
+	b_quant -= b_coins_to_sell;
+	s_quant += temp;
+	
+
+	//update coin with string version of new coin balance 
+	std::stringstream bigstream;
+	std::stringstream smallstream;
+	bigstream << std::fixed << std::setprecision(10) << b_quant;
+	smallstream << std::fixed << std::setprecision(10) << s_quant;
+	coins[big].quant = bigstream.str();
+	coins[small].quant = smallstream.str();
+
+	//std::cout << "new coin balance: " << std::endl;
+	//std::cout << coins[small].name << coins[small].quant << std::endl;
+	//std::cout << coins[big].name << coins[big].quant << std::endl;
 }
 
 void update_config(Coin(&coins)[10], unsigned int length) {
-	// update config with new coin values 
+	std::ofstream wfile("config.txt", std::ofstream::trunc);
+
+	for (unsigned int i = 0 ; i < length; i++) {
+		wfile << coins[i].name << " ";
+	}
+	wfile << std::endl;
+
+	for (unsigned int i = 0 ; i < length; i++) {
+		wfile << coins[i].quant << " ";
+	}
+	wfile << std::endl;
+
+	for (unsigned int i = 0 ; i < length; i++) {
+		wfile << coins[i].tbal << " ";
+	}
+	wfile << std::endl;
+
+	wfile.close();	
 }
 
 void recommend(Coin(&coins)[10], double(&offset)[10], unsigned int length) {
@@ -433,6 +439,8 @@ void balance(Coin (&coins)[10], unsigned int length) {
 	std::cin >> input; 
 	if (input == 'y') {
 		recommend(coins, usd_offset, length);
+		print_coins(coins,length);
+		update_config(coins, length);
 	} else {
 		std::cout << "no" << std::endl; 
 	}
