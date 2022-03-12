@@ -1,6 +1,8 @@
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include <cstring>
+#include <iomanip>
 #include <cstdlib>
 
 /*
@@ -216,19 +218,66 @@ void readfromfile (std::string filename, Coin (&coins)[10], unsigned int length)
 } 
 
 void printcoin(Coin c) {
-	std::cout << c.name << "    " ; 
-	std::cout << c.price << "   "; 
-	std::cout << c.quant << "   " ; 
-	std::cout << c.usdval << "   " ; 
-	std::cout << c.tbal << "%" << std::endl; 
+	int name_len = c.name.length();
+	int price_len = c.price.length();
+	int quant_len = c.quant.length();
+	std::stringstream stream;
+	stream << std::fixed << std::setprecision(6) << c.usdval;
+	std::string usdval = stream.str();
+	int usdval_len = usdval.length();
+	int tbal_len = c.tbal.length(); 
 
+	const int tname_len = 6;
+	const int tprice_len = 24;
+	const int tquant_len = 12; 
+	const int tusdval_len = 14; 
+	const int ttbal_len = 6;
+
+	int name_dash = tname_len - name_len; 
+	int price_dash = tprice_len - price_len;
+	int quant_dash = tquant_len - quant_len;
+	int usdval_dash = tusdval_len - usdval_len;
+	int tbal_dash = ttbal_len - tbal_len;
+	
+	std::cout << c.name; 
+	for (int a = 0 ; a < name_dash; a++) {
+		std::cout << '-';
+	}	
+
+	std::cout << c.price; 
+	for (int d = 0 ; d < price_dash; d++) {
+		std::cout << '-';
+	}
+
+	std::cout << c.quant; 
+	for (int f = 0 ; f < quant_dash; f++) {
+		std::cout << '-';
+	}
+
+	std::cout << usdval; 
+	for (int h = 0 ; h < usdval_dash; h++) {
+		std::cout << '-';
+	}
+
+	std::cout << c.tbal << "%" << std::endl; 
+	
+}
+
+void print_coins(Coin (&coins)[10], unsigned int length) {
+	//6 16 12 14 6 
+	std::cout << "Name--Price-------------------Quant-------USD Val-------T Bal-" << std::endl;
+
+	for (unsigned int x = 0 ; x < length; x++) {
+		// 6 12 12 12 5 
+		printcoin(coins[x]);
+	}
 }
 
 void confirm_trade(double mag, Coin(&coins)[10], unsigned int big, unsigned int small) {
 	// move magnitude from coins[big] to coins[small]
 	// confirm exact coin amount
 	// recalculate usd amount 
-	// get price in double 
+
 	std::string::size_type sz;     // alias of size_t
 	
 	double s_price = stod (coins[small].price,&sz);
@@ -357,12 +406,9 @@ void balance(Coin (&coins)[10], unsigned int length) {
 	double tbald; // target balance in usd 
 	std::string::size_type sz;     // alias of size_t - used to convert from string to double 
 	
-	std::cout << "Name    Price              Quant     USD Val    T Bal" << std::endl;
-	
 	for (unsigned int x = 0 ; x < length; x++) {
-		printcoin(coins[x]);
-		totalvalue += coins[x].usdval;	
-	}
+			totalvalue += coins[x].usdval;	
+		}
 	
 	std::cout << "total val is: " << totalvalue << std::endl;	
 	
@@ -418,7 +464,7 @@ int main(){
 	}		
 
 	readfromfile("list.txt", coins, length); 
-	
+	print_coins(coins, length);
 	balance(coins, length);
 	
 	return 0;
