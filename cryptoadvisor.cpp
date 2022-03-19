@@ -39,7 +39,6 @@ struct Coin
 
 
 
-
 void readconfig(std::string (&names)[10], std::string (&holdings)[10], std::string (&tbal)[10]) {
 	std::ifstream input;
 	input.open("config.txt");
@@ -47,26 +46,20 @@ void readconfig(std::string (&names)[10], std::string (&holdings)[10], std::stri
 	int linecount = 0; // index for the line number 
 
 	for (std::string tp; getline(input, tp); ) {
-
-		// make char array one longer
-		// make last char space 
-		int l = tp.length() + 1;	
-		char p[l];		
-		p[l-1] = 32;
-		
-		
+			
+		char p[tp.length()];		
 		std::string temp = "";	
 		unsigned int entries_index = 0;  // index of which element on the line 		
 			
 
 		for (int i = 0; i < sizeof(p); i++) {
 			p[i] = tp[i]; // convert string to char array 
-			
-			if (p[i] == 32 && temp.length() > 0) {
-				// if we hit the space and we have some content saved in temp string
+
+			if (p[i] == 32) {
+				// if we hit the space
 				//increment entries index and copy temp string to correct array based on line number					
-								
-				switch (linecount) {
+				if (temp.length() > 0) {
+					switch (linecount) {
 					case 0:
 					names[entries_index] = temp;
 					break;
@@ -78,16 +71,33 @@ void readconfig(std::string (&names)[10], std::string (&holdings)[10], std::stri
 					break;
 					default:
 					std::cout << "error in read config" << std::endl;
-					break;				
-
+					break;		
 				};							
 				temp = "";
 				entries_index++;	
+				}	
 			} else {
 				// as long as this char is not space, copy into the temp string 
 				temp.push_back(p[i]); // copy char into the temp string 
-			}		
+			}	
 		}
+		// if config line does not end in a space the final entry of the line needs to be copied
+		if (temp.length() > 0) {
+			switch (linecount) {
+			case 0:
+			names[entries_index] = temp;
+			break;
+			case 1:
+			holdings[entries_index] = temp;
+			break;
+			case 2:
+			tbal[entries_index] = temp; 
+			break;
+			default:
+			std::cout << "error in read config" << std::endl;
+			break;		
+			};	
+		}					
 		linecount++;
 	}
 
