@@ -16,10 +16,11 @@
  * 
  * Refactor and technical goals:
  * Generalize the solution 
- * Implement linked list to allow variable numbers of coins 
+ * Implement linked list to allow variable numbers of coins defined in config.txt
+ * Coin should be a class not a struct with static and instance methods 
+ * 
  * 
  * ToDo / left off:
- * - at end of program when coins are printed - need to update usd value after coins are rebalanced. 
  * need to validate input for target balance after reading config file 
  * clean up main() - move to small helper functions 
  * move total val from balance into print coins and format it in a nice way 
@@ -228,8 +229,6 @@ void readfromfile (std::string filename, Coin (&coins)[10], unsigned int length)
 		}
 		rfile.close();		
 } 
-
-
 
 void printcoin(Coin c) {
 	int name_len = c.name.length();
@@ -471,6 +470,26 @@ void balance(Coin (&coins)[10], unsigned int length) {
 	}
 }
 
+bool valtbal(Coin (&coins)[10], unsigned int length) {
+	// validate tbal read from config
+	// true if valid  - false if invalid 
+	// tbal is a percent and needs to add to 100
+
+	double sum = 0 ; 
+	double x; 
+	std::string::size_type sz; 
+
+	for (unsigned int i = 0 ; i < length; i++)  {
+		x = stod (coins[i].tbal,&sz);
+		sum += x; 
+	}
+
+	if (appxequal(sum, 100.0)) {
+		return true;
+	} else {
+		return false;
+	}
+}
 
 int main(){
 	Coin coins[10] ;
@@ -495,7 +514,11 @@ int main(){
 		coins[j].tbal = tbal[j]; 
 		//std::cout << coins[j].name << coins[j].quant << coins[j].tbal << std::endl;
 	}		
-
+	if (valtbal(coins, length) == false) {
+		std::cout << "Config percents do not add to 100%" << std::endl; 
+		std::cout << "Please check config.txt" << std::endl; 
+		return 0; 
+	}
 	readfromfile("list.txt", coins, length); 
 	print_coins(coins, length);
 	balance(coins, length);
