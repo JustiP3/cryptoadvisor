@@ -2,8 +2,6 @@
 
 API_KEY=`cat apikey.txt`
 
-echo "$API_KEY"
-
 curl -X POST 'https://api.livecoinwatch.com/coins/list' -o list.txt \
   -H 'content-type: application/json' \
   -H  'x-api-key: '"${API_KEY}"'' \
