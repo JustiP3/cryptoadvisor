@@ -20,7 +20,7 @@
  * 
  * ToDo / left off:
  * - at end of program when coins are printed - need to update usd value after coins are rebalanced. 
- * need to fix readconfig to not break the program if config does not contain a trailing space 
+ * need to validate input for target balance after reading config file 
  * clean up main() - move to small helper functions 
  * move total val from balance into print coins and format it in a nice way 
  * validate input for response to "would you like reblance recommendations?"
@@ -185,6 +185,16 @@ bool appxequal(double x, double y) {
 	}
 }
 
+void calcusdvalue(Coin &c) {
+	c.usdval = smult(c.price, c.quant);
+}
+
+void updateusdvalue(Coin(&coins)[10],unsigned int length) {
+	for (unsigned int i = 0 ; i < length; i++) {
+		calcusdvalue(coins[i]);
+	}
+}
+
 void readfromfile (std::string filename, Coin (&coins)[10], unsigned int length) {
 		
 		std::ifstream rfile;
@@ -207,7 +217,7 @@ void readfromfile (std::string filename, Coin (&coins)[10], unsigned int length)
 					for (unsigned int j = 0; j < length ; j++) {		
 						if (a.compare(coins[j].name) == 0) {											
 							coins[j].price = getprice(temp); 
-							coins[j].usdval = smult(coins[j].price,coins[j].quant); 							
+							calcusdvalue(coins[j]);						
 						}	
 					}
 					
@@ -218,6 +228,8 @@ void readfromfile (std::string filename, Coin (&coins)[10], unsigned int length)
 		}
 		rfile.close();		
 } 
+
+
 
 void printcoin(Coin c) {
 	int name_len = c.name.length();
@@ -300,9 +312,6 @@ void confirm_trade(double mag, Coin(&coins)[10], unsigned int big, unsigned int 
 	coins[big].quant = bigstream.str();
 	coins[small].quant = smallstream.str();
 
-	//std::cout << "new coin balance: " << std::endl;
-	//std::cout << coins[small].name << coins[small].quant << std::endl;
-	//std::cout << coins[big].name << coins[big].quant << std::endl;
 }
 
 void update_config(Coin(&coins)[10], unsigned int length) {
@@ -454,6 +463,7 @@ void balance(Coin (&coins)[10], unsigned int length) {
 	std::cin >> input; 
 	if (input == 'y') {
 		recommend(coins, usd_offset, length);
+		updateusdvalue(coins,length);
 		print_coins(coins,length);
 		update_config(coins, length);
 	} else {
