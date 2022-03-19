@@ -10,8 +10,8 @@
  * Read text file with config and current holdings - done 
  * Fetch current crypto prices from api - bash script calls api, writes to text file then this program reads from text file - close enough
  * Calculate current values and compare to config - done 
- * Recommend trades to rebalance per config - done, kind of. recommend trades in terms of the coin at hand rather than USD - almost there 
- * Update config file with new balances if recommended trades were made. 
+ * Recommend trades to rebalance per config - done
+ * Update config file with new balances if recommended trades were made - done
  * 
  * 
  * Refactor and technical goals:
@@ -19,12 +19,11 @@
  * Implement linked list to allow variable numbers of coins 
  * 
  * ToDo / left off:
- * new coin balance is wrong - need to fix 
+ * - at end of program when coins are printed - need to update usd value after coins are rebalanced. 
+ * need to fix readconfig to not break the program if config does not contain a trailing space 
  * clean up main() - move to small helper functions 
  * move total val from balance into print coins and format it in a nice way 
- * Recommend trades to rebalance per config - done, kind of. recommend trades in terms of the coin at hand rather than USD - almost there 
  * validate input for response to "would you like reblance recommendations?"
- * Update config file with new balances if recommended trades were made. 
  * 
  * 
 */ 
@@ -48,7 +47,14 @@ void readconfig(std::string (&names)[10], std::string (&holdings)[10], std::stri
 	int linecount = 0; // index for the line number 
 
 	for (std::string tp; getline(input, tp); ) {
-		char p[tp.length()];
+
+		// make char array one longer
+		// make last char space 
+		int l = tp.length() + 1;	
+		char p[l];		
+		p[l-1] = 32;
+		
+		
 		std::string temp = "";	
 		unsigned int entries_index = 0;  // index of which element on the line 		
 			
@@ -56,10 +62,9 @@ void readconfig(std::string (&names)[10], std::string (&holdings)[10], std::stri
 		for (int i = 0; i < sizeof(p); i++) {
 			p[i] = tp[i]; // convert string to char array 
 			
-			if (p[i] == 32) {
-				// if we hit the space increment entries index and copy temp to 
-				// names holdings or tbal based on line number	
-				// don't copy the space into the temp string 							
+			if (p[i] == 32 && temp.length() > 0) {
+				// if we hit the space and we have some content saved in temp string
+				//increment entries index and copy temp string to correct array based on line number					
 								
 				switch (linecount) {
 					case 0:
