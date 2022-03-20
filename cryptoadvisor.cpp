@@ -159,6 +159,21 @@ std::string getprice(std::string line) {
 	return ans; 
 }
 
+bool valdoublein(std::string input) {	
+    double d;    
+	std::stringstream ss(input);
+	if (ss >> d)
+	{
+		if (ss.eof())
+		{
+			return true; 
+		}
+	}        		
+    
+	std::cout << "Error. Inputted value is not a number." << std::endl;
+	return false; 
+}
+
 double smult (std::string a, std::string b) {
 	double x, y;
 	std::string::size_type sz;     // alias of size_t
@@ -293,15 +308,22 @@ void confirm_trade(double mag, Coin(&coins)[10], unsigned int big, unsigned int 
 	double b_quant = stod (coins[big].quant, &sz); 
 	double b_coins_to_sell = mag / b_price; 
 
+	bool valid = false; 
+	std::string temp;
+
 	std::cout << "Sell " << b_coins_to_sell << " " << coins[big].name << std::endl;
-	std::cout << "What amount of " << coins[small].name << " are you getting in exchange?" << std::endl;
-	double temp;
-	std::cin >> temp; 
-	//need to validate temp 
+
+	while (valid == false) {
+		std::cout << "What amount of " << coins[small].name << " are you getting in exchange?" << std::endl;
+		temp = "";
+		std::cin >> temp; 
+		valid = valdoublein(temp);
+	}
+	
+	double dtemp = stod(temp, &sz);
 
 	b_quant -= b_coins_to_sell;
-	s_quant += temp;
-	
+	s_quant += dtemp;	
 
 	//update coin with string version of new coin balance 
 	std::stringstream bigstream;
@@ -310,7 +332,6 @@ void confirm_trade(double mag, Coin(&coins)[10], unsigned int big, unsigned int 
 	smallstream << std::fixed << std::setprecision(10) << s_quant;
 	coins[big].quant = bigstream.str();
 	coins[small].quant = smallstream.str();
-
 }
 
 void update_config(Coin(&coins)[10], unsigned int length) {
