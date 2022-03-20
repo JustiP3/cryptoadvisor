@@ -22,8 +22,6 @@
  * 
  * ToDo / left off:
  * add actual percent values to the line that prints "you are holding..."
- * validate input for custom trades - need to validate int selctions 
- * complete custom trades function - see comments in the function 
  * clean up main() - move to small helper functions 
  * 
  * 
@@ -328,8 +326,23 @@ void print_coins(Coin (&coins)[10], unsigned int length) {
 	std::cout << "-------" << std::endl; 
 }
 
+void printacttargdiff(Coin (&coins)[10], unsigned int length, double offset[10], double total, double tbald[10]) {
+
+	// convert to a string rather than printing double directly
+	// set precision 
+	// add + if positive before $ and - if negative before $
+	// set consistent column width 
+	std::cout << "Your current holdings compare with your target goal as follows:" << std::endl; 
+	double tbal;
+	for (unsigned int i = 0; i < length; i++) {
+		std::cout << "$" << offset[i] << "USD " << coins[i].name 
+		<< " (" << 100*coins[i].usdval/total << "%). " 
+		<< "Target: " << total*tbald[i]/100 << "USD" << std::endl;
+	}
+	std::cout << "------" << std::endl; 
+}
+
 void customtrade(Coin(&coins)[10], unsigned int length) {
-	// * still need to validate int selecitons for buy coin and sell coin 
 
 	std::cout << "----" << std::endl;	
 	std::cout << "Which coin would you like to sell?" << std::endl;	
@@ -388,10 +401,6 @@ void customtrade(Coin(&coins)[10], unsigned int length) {
 			dbuyq = stod(buyq, &sz); 
 		}
 	}
-
-	// now we know the coin indices for sell and buy and the quantities
-	// need to update coin variables (string arithmatic)
-	// back in the balance() user input loop we will update config 
 
 	double bcb;
 	double scb; 
@@ -554,40 +563,31 @@ void recommend(Coin(&coins)[10], double(&offset)[10], unsigned int length) {
 }
 
 void balance(Coin (&coins)[10], unsigned int length) {
-	/*
-	 * calc total value
-	 * cast tbal to double 
-	 * calc offset in percent
-	 * */
+	/* Calculate total value
+	*  Calculate how current coin balances compares to target
+	*  Print results
+	*  Prompt user - Recommend trades? Custom Trade? Neither?
+	*/ 
+
 	double totalvalue = 0; 
 	double usd_offset[10]; // the difference between target balance usd and current value usd for each coin 
-	double tbald; // target balance in usd 
+	double tbald[10]; // target balance in usd 
 	std::string::size_type sz;     // alias of size_t - used to convert from string to double 
 	
 	for (unsigned int x = 0 ; x < length; x++) {
 			totalvalue += coins[x].usdval;	
-		}
-	
+		}	
 
-	for (int i = 0 ; i < length; i++) {
-		// convert string target balance to double 
-		tbald = stod (coins[i].tbal, &sz);
-
-		// populate usd offset array 
-		usd_offset[i] = coins[i].usdval - ((tbald/100) * totalvalue);	
-
-		//print results  
-		// move to it's own function - add actual percents
-		// printacttargdiff - include usd difference and percent difference 
-		std::cout << "You are holding $" << usd_offset[i] << "USD " << coins[i].name
-		<< " compared to target " << "USD: " << tbald*totalvalue/100 << std::endl;
-			
+	for (unsigned int i = 0 ; i < length; i++) {
+		tbald[i] = stod (coins[i].tbal, &sz);
+		usd_offset[i] = coins[i].usdval - ((tbald[i]/100) * totalvalue);			
 	}	
 
-	// ask user if they would like trade reccomendations 
-	
-	bool escape = false; 
+	// print results 
+	printacttargdiff(coins, length, usd_offset, totalvalue, tbald);
 
+	// ask user if they would like trade reccomendations 	
+	bool escape = false; 
 	while (escape == false) {
 		char input; 
 		std::cout << "Would you like:" << std::endl; 
