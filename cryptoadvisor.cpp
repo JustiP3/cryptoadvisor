@@ -21,11 +21,10 @@
  * 
  * 
  * ToDo / left off:
+ * add actual percent values to the line that prints "you are holding..."
  * validate input for custom trades - need to validate int selctions 
  * complete custom trades function - see comments in the function 
  * clean up main() - move to small helper functions 
- * move total val from balance into print coins and format it in a nice way 
- * 
  * 
  * 
 */ 
@@ -175,6 +174,26 @@ bool valdoublein(std::string input) {
 	return false; 
 }
 
+int validateintselection(std::string input, unsigned int length) {
+	// returns int selection if valid or -1 if not valid 
+	int len = length; 
+	int selection;
+
+	std::stringstream ss(input);
+	if (ss >> selection) {
+		if (ss.eof()) {
+			// the input is a valid int , but is it one of the options available?
+			for (int i = 0 ; i < len ; i++) {
+				if (i == selection) {
+					return selection; 
+				}
+			}
+		}
+	} // if the input is not a valid int or if it is not one of the options available 
+	std::cout << "Error. Invalid input. Please enter a valid selection." << std::endl; 
+	return -1; 	
+}
+
 double smult (std::string a, std::string b) {
 	double x, y;
 	std::string::size_type sz;     // alias of size_t
@@ -310,19 +329,37 @@ void print_coins(Coin (&coins)[10], unsigned int length) {
 }
 
 void customtrade(Coin(&coins)[10], unsigned int length) {
+	// * still need to validate int selecitons for buy coin and sell coin 
+
 	std::cout << "----" << std::endl;	
 	std::cout << "Which coin would you like to sell?" << std::endl;	
 	for (unsigned int i = 0; i < length ; i++) {
 		std::cout << i << ". " << coins[i].name << std::endl;
 	}
 	int sellcoin;
-	std::cin >> sellcoin; // need to validate input 
+	bool validinput = false; 
+	while (validinput == false) {
+		std::string temp;
+		std::cin >> temp; 
+		sellcoin = validateintselection(temp, length);
+		if (sellcoin != -1) {
+			validinput = true; 
+		}
+	}
 	std::cout << "Which coin would you like to buy?" << std::endl;	
 	for (unsigned int j = 0; j < length ; j++) {
 		std::cout << j << ". " << coins[j].name << std::endl; 
 	}
 	int buycoin;
-	std::cin >> buycoin; // need to validate input 
+	validinput = false; 
+	while (validinput == false) {
+		std::string temp;
+		std::cin >> temp; 
+		buycoin = validateintselection(temp, length);
+		if (buycoin != -1) {
+			validinput = true; 
+		}
+	}
 
 	std::cout << "How much " << coins[sellcoin].name << " do you want to sell?" << std::endl;
 
@@ -355,8 +392,19 @@ void customtrade(Coin(&coins)[10], unsigned int length) {
 	// now we know the coin indices for sell and buy and the quantities
 	// need to update coin variables (string arithmatic)
 	// back in the balance() user input loop we will update config 
-	std::cout << "You chose to sell " << dsellq << coins[sellcoin].name << " for " << dbuyq << coins[buycoin].name << std::endl; 
 
+	double bcb;
+	double scb; 
+	scb = stod (coins[sellcoin].quant, &sz);
+	bcb = stod (coins[buycoin].quant, &sz);
+
+	bcb += dbuyq;
+	scb -= dsellq;
+
+	coins[sellcoin].quant = std::to_string(scb);
+	coins[buycoin].quant = std::to_string(bcb);
+
+	std::cout << "You chose to sell " << dsellq << coins[sellcoin].name << " for " << dbuyq << coins[buycoin].name << std::endl; 
 }
 
 void confirm_trade(double mag, Coin(&coins)[10], unsigned int big, unsigned int small) {
@@ -529,6 +577,8 @@ void balance(Coin (&coins)[10], unsigned int length) {
 		usd_offset[i] = coins[i].usdval - ((tbald/100) * totalvalue);	
 
 		//print results  
+		// move to it's own function - add actual percents
+		// printacttargdiff - include usd difference and percent difference 
 		std::cout << "You are holding $" << usd_offset[i] << "USD " << coins[i].name
 		<< " compared to target " << "USD: " << tbald*totalvalue/100 << std::endl;
 			
