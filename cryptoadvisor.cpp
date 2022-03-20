@@ -22,6 +22,7 @@
  * 
  * ToDo / left off:
  * validate input for custom trades - need to validate int selctions 
+ * complete custom trades function - see comments in the function 
  * clean up main() - move to small helper functions 
  * move total val from balance into print coins and format it in a nice way 
  * 
@@ -297,6 +298,15 @@ void print_coins(Coin (&coins)[10], unsigned int length) {
 	for (unsigned int x = 0 ; x < length; x++) {
 		printcoin(coins[x]);
 	}
+
+	double totalvalue = 0; 
+
+	for (unsigned int i = 0 ; i < length; i++) {
+		totalvalue += coins[i].usdval;	
+	}
+
+	std::cout << "Total Value:    " << totalvalue << std::endl;
+	std::cout << "-------" << std::endl; 
 }
 
 void customtrade(Coin(&coins)[10], unsigned int length) {
@@ -348,6 +358,7 @@ void customtrade(Coin(&coins)[10], unsigned int length) {
 	std::cout << "You chose to sell " << dsellq << coins[sellcoin].name << " for " << dbuyq << coins[buycoin].name << std::endl; 
 
 }
+
 void confirm_trade(double mag, Coin(&coins)[10], unsigned int big, unsigned int small) {
 	
 	std::string::size_type sz; 
@@ -508,8 +519,6 @@ void balance(Coin (&coins)[10], unsigned int length) {
 	for (unsigned int x = 0 ; x < length; x++) {
 			totalvalue += coins[x].usdval;	
 		}
-	
-	std::cout << "total val is: " << totalvalue << std::endl;	
 	
 
 	for (int i = 0 ; i < length; i++) {
