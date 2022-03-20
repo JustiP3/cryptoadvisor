@@ -21,10 +21,10 @@
  * 
  * 
  * ToDo / left off:
- * need to validate input for target balance after reading config file 
+ * validate input for custom trades - need to validate int selctions 
  * clean up main() - move to small helper functions 
  * move total val from balance into print coins and format it in a nice way 
- * validate input for response to "would you like reblance recommendations?"
+ * 
  * 
  * 
 */ 
@@ -299,6 +299,55 @@ void print_coins(Coin (&coins)[10], unsigned int length) {
 	}
 }
 
+void customtrade(Coin(&coins)[10], unsigned int length) {
+	std::cout << "----" << std::endl;	
+	std::cout << "Which coin would you like to sell?" << std::endl;	
+	for (unsigned int i = 0; i < length ; i++) {
+		std::cout << i << ". " << coins[i].name << std::endl;
+	}
+	int sellcoin;
+	std::cin >> sellcoin; // need to validate input 
+	std::cout << "Which coin would you like to buy?" << std::endl;	
+	for (unsigned int j = 0; j < length ; j++) {
+		std::cout << j << ". " << coins[j].name << std::endl; 
+	}
+	int buycoin;
+	std::cin >> buycoin; // need to validate input 
+
+	std::cout << "How much " << coins[sellcoin].name << " do you want to sell?" << std::endl;
+
+	bool validsell = false; 
+	double dsellq;
+	std::string::size_type sz; 
+	
+	while (validsell == false) {
+		std::string sellq;
+		std::cin >> sellq; 
+		validsell = valdoublein(sellq);
+		if (validsell == true) {
+			dsellq = stod(sellq, &sz); 
+		}
+	}
+	std::cout << "How much " << coins[buycoin].name << " are you getting in exchange?" << std::endl;
+
+	bool validbuy = false; 
+	double dbuyq;
+	
+	while (validbuy == false) {
+		std::string buyq;
+		std::cin >> buyq; 
+		validbuy = valdoublein(buyq);
+		if (validbuy == true) {
+			dbuyq = stod(buyq, &sz); 
+		}
+	}
+
+	// now we know the coin indices for sell and buy and the quantities
+	// need to update coin variables (string arithmatic)
+	// back in the balance() user input loop we will update config 
+	std::cout << "You chose to sell " << dsellq << coins[sellcoin].name << " for " << dbuyq << coins[buycoin].name << std::endl; 
+
+}
 void confirm_trade(double mag, Coin(&coins)[10], unsigned int big, unsigned int small) {
 	
 	std::string::size_type sz; 
@@ -477,18 +526,30 @@ void balance(Coin (&coins)[10], unsigned int length) {
 	}	
 
 	// ask user if they would like trade reccomendations 
-	std::cout << "Would you like trade recommendations?" << std::endl; 
-	std::cout << "(y / n)" << std::endl; 
-	char input;
-	std::cin >> input; 
-	if (input == 'y') {
-		recommend(coins, usd_offset, length);
+	
+	bool escape = false; 
+
+	while (escape == false) {
+		char input; 
+		std::cout << "Would you like:" << std::endl; 
+		std::cout << "1. Trade recommendations?" << std::endl; 
+		std::cout << "2. Custom Trade?" << std::endl; 
+		std::cout << "0. Neither. Escape from this menu." << std::endl; 
+		std::cout << "Enter '1' for recommendations, '2' for custom, or '0' to skip." << std::endl; 
+		
+		std::cin >> input; 
+		if (input == '1') {
+			recommend(coins, usd_offset, length);		
+		} else if (input == '2') {
+			customtrade(coins, length);
+		} else {
+			escape = true; 
+			return; 
+		}
 		updateusdvalue(coins,length);
 		print_coins(coins,length);
 		update_config(coins, length);
-	} else {
-		std::cout << "no" << std::endl; 
-	}
+	}	
 }
 
 bool valtbal(Coin (&coins)[10], unsigned int length) {
