@@ -23,6 +23,12 @@
  * ToDo / left off:
  * add actual percent values to the line that prints "you are holding..."
  * clean up main() - move to small helper functions 
+ * there are 2 tables that get printed - one of them is printed at the end of each trade cyle loop
+ * the other is only displayed at the beginning - print both tables together 
+ * when displaying choices for custom trade remove unnecesary line breaks and just dispay 
+ * options on the same line
+ * add validation to amount entered for trades in exchange - if value is more than 10% outside of expected 
+ * add feature to correct the config file from the command line 
  * 
  * 
 */ 
@@ -347,8 +353,9 @@ void customtrade(Coin(&coins)[10], unsigned int length) {
 	std::cout << "----" << std::endl;	
 	std::cout << "Which coin would you like to sell?" << std::endl;	
 	for (unsigned int i = 0; i < length ; i++) {
-		std::cout << i << ". " << coins[i].name << std::endl;
+		std::cout << i << ". " << coins[i].name << " ";
 	}
+	std::cout << std::endl;
 	int sellcoin;
 	bool validinput = false; 
 	while (validinput == false) {
@@ -361,8 +368,9 @@ void customtrade(Coin(&coins)[10], unsigned int length) {
 	}
 	std::cout << "Which coin would you like to buy?" << std::endl;	
 	for (unsigned int j = 0; j < length ; j++) {
-		std::cout << j << ". " << coins[j].name << std::endl; 
+		std::cout << j << ". " << coins[j].name << " "; 
 	}
+	std::cout << std::endl;
 	int buycoin;
 	validinput = false; 
 	while (validinput == false) {
