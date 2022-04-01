@@ -25,8 +25,6 @@
  * clean up main() - move to small helper functions 
  * there are 2 tables that get printed - one of them is printed at the end of each trade cyle loop
  * the other is only displayed at the beginning - print both tables together 
- * when displaying choices for custom trade remove unnecesary line breaks and just dispay 
- * options on the same line
  * add validation to amount entered for trades in exchange - if value is more than 10% outside of expected 
  * add feature to correct the config file from the command line 
  * 
@@ -577,26 +575,26 @@ void balance(Coin (&coins)[10], unsigned int length) {
 	*  Prompt user - Recommend trades? Custom Trade? Neither?
 	*/ 
 
-	double totalvalue = 0; 
+	double totalvalue; 
 	double usd_offset[10]; // the difference between target balance usd and current value usd for each coin 
 	double tbald[10]; // target balance in usd 
 	std::string::size_type sz;     // alias of size_t - used to convert from string to double 
 	
-	for (unsigned int x = 0 ; x < length; x++) {
+
+	bool escape = false; 
+	while (escape == false) {
+		totalvalue = 0; 
+		for (unsigned int x = 0 ; x < length; x++) {
 			totalvalue += coins[x].usdval;	
 		}	
 
-	for (unsigned int i = 0 ; i < length; i++) {
-		tbald[i] = stod (coins[i].tbal, &sz);
-		usd_offset[i] = coins[i].usdval - ((tbald[i]/100) * totalvalue);			
-	}	
+		for (unsigned int i = 0 ; i < length; i++) {
+			tbald[i] = stod (coins[i].tbal, &sz);
+			usd_offset[i] = coins[i].usdval - ((tbald[i]/100) * totalvalue);			
+		}	
 
-	// print results 
-	printacttargdiff(coins, length, usd_offset, totalvalue, tbald);
-
-	// ask user if they would like trade reccomendations 	
-	bool escape = false; 
-	while (escape == false) {
+		// print results 
+		printacttargdiff(coins, length, usd_offset, totalvalue, tbald);
 		char input; 
 		std::cout << "Would you like:" << std::endl; 
 		std::cout << "1. Trade recommendations?" << std::endl; 
@@ -653,7 +651,6 @@ int main(){
 	for (int i = 0; i < 10; i++) {
 		if (names[i].length() > 0 ) {
 			length++;
-			//std::cout << names[i] << holdings[i] << tbal[i] << std::endl;
 		}
 	}		
 
@@ -661,7 +658,6 @@ int main(){
 		coins[j].name = names[j];	
 		coins[j].quant = holdings[j];
 		coins[j].tbal = tbal[j]; 
-		//std::cout << coins[j].name << coins[j].quant << coins[j].tbal << std::endl;
 	}		
 	if (valtbal(coins, length) == false) {
 		std::cout << "Config percents do not add to 100%" << std::endl; 
